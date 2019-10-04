@@ -11,6 +11,9 @@ FWDIR:=$(ROOT)/firmware
 BINDIR=$(ROOT)/bin
 SRCDIR=$(ROOT)/src
 INCDIR=$(ROOT)/include
+TESTDIRROOT=$(SRCDIR)/tests
+MOCKSDKDIR=$(TESTDIRROOT)/mockSDK
+TESTCASES=$(TESTDIRROOT)/Automated
 EXTRA_INCDIR=$(FWDIR)/libv5rts/sdk/vexv5/include
 
 # Directories to be excluded from all builds
@@ -45,6 +48,11 @@ PATCHED_SDK=$(FWDIR)/libv5rts/sdk/vexv5/libv5rts.patched.a
 
 EXTRA_LIB_DEPS=$(INCDIR)/api.h $(PATCHED_SDK)
 
+MOCK_SDK_FILES=$(wildcard $(MOCKSDKDIR)/*.c)
+MOCK_SDK_OBJ=$(addprefix $(BINDIR)/,$(patsubst $(SRCDIR)/%,%.o,$(call MOCK_SDK_FILES, $1)))
+TEST_LIBS=$(filter-out $(FWDIR)/lib5rts.a, $(LIBRARIES))
+MOCK_SDK_NAME=$(FWDIR)/mock_libv5rts.a
+
 ################################################################################
 ################################################################################
 ########## Nothing below this line should be edited by typical users ###########
@@ -62,6 +70,14 @@ CREATE_TEMPLATE_ARGS=--system "./**/*"
 CREATE_TEMPLATE_ARGS+=--user "src/main.{cpp,c,cc}" --user "include/main.{hpp,h,hh}" --user "Makefile" --user ".gitignore"
 CREATE_TEMPLATE_ARGS+=--target v5
 CREATE_TEMPLATE_ARGS+=--output bin/monolith.bin --cold_output bin/cold.package.bin --hot_output bin/hot.package.bin --cold_addr 58720256 --hot_addr 125829120
+
+MOCK_SDK: $(MOCK_SDK_OBJ)
+	$(LD) -lc -r -o MOCK_SDK_NAME $(MOCK_SDK_OBJ)
+
+TEST_CASES:
+
+Tests: $(ELF_DEPS) $(TEST_LIBS) MOCK_SDK TEST_CASES
+	g++ -mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -Os -g -Wall -Wpedantic  -nostdlib -ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables ./bin/main.cpp.o ./bin/_pros_ld_timestamp.o -Wl,-T./firmware/v5.ld,--gc-sections,--start-group,./firmware/libc.a,./firmware/libm.a,./bin/libpros.a,-lc,-lm,-lgcc,-lstdc++,-lsupc++,--end-group -o bin/monolith.elf
 
 template: clean-template library
 	$(VV)mkdir -p $(TEMPLATE_DIR)
