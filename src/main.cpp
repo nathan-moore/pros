@@ -1,5 +1,65 @@
 #include "main.h"
 
+void trigTest()
+{
+    float input = 1.0;
+
+    float aboutOne = atanf(tanf(sinf(asinf(input))));
+
+    aboutOne = powf(2, log2f(aboutOne));
+
+    if (aboutOne > .95 && aboutOne < 1.05)
+        return;
+
+    std::cout << "trig test isn't in expected range" << std::endl;
+}
+
+void trigDoubleTest()
+{
+    double input = 1.0;
+
+    double aboutOne = atan(tan(sin(asin(input))));
+
+    aboutOne = pow(2, log2(aboutOne));
+
+    if (aboutOne > .95 && aboutOne < 1.05)
+        return;
+
+    std::cout << " double trig test isn't in expected range" << std::endl;
+}
+
+int cmp(void const* a, void const* b)
+{
+    return *(int*)a >= *(int*)b;
+}
+
+void miscTest()
+{
+    int arr[] = { 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+    qsort(arr, sizeof(arr) / sizeof(int), sizeof(int), cmp);
+
+    for (int i = 1; i < (sizeof(arr) / sizeof(int)); i++)
+    {
+        if (arr[i] < arr[i - 1])
+            std::cout << "qsort didn't work" << std::endl;
+    }
+}
+
+void fileIOTest()
+{
+    FILE* file = fopen("fileThatDoesntExist", "r");
+    if (file == NULL)
+        return;
+
+    //atleast check that these link
+    ftell(file);
+    fwrite("Hello World, this is a test to make sure that this works", sizeof(char), 10, file);
+    fscanf(file, "%d", NULL);
+    fclose(file);
+
+    std::cout << "fileIO opened a file that doesn't exist" << std::endl;
+}
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -23,10 +83,10 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+	trigTest();
+    trigDoubleTest();
+    fileIOTest();
+    miscTest();
 }
 
 /**
