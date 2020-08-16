@@ -1,5 +1,7 @@
 #include "main.h"
 
+// not supposed to be exhastive, but provides a decent coverage
+
 void trigTest()
 {
     float input = 1.0;
@@ -60,6 +62,19 @@ void fileIOTest()
     std::cout << "fileIO opened a file that doesn't exist" << std::endl;
 }
 
+void stringTests() 
+{
+    const char* s = "This is a test string";
+    char* mallocedString = strdup(s);
+    int len = strlen(mallocedString);
+    if (len != strlen(s))
+        std::cout << "error" << std::endl;
+
+    char* sub = strstr(mallocedString, "is");
+    if (sub == NULL)
+        std::cout << "strstr not working" << std::endl;
+}
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -87,6 +102,7 @@ void initialize() {
     trigDoubleTest();
     fileIOTest();
     miscTest();
+	stringTests();
 }
 
 /**
